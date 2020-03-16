@@ -1,0 +1,2 @@
+subjectAltName = DNS:*.zycgod.cn,IP:172.16.180.44,IP:127.0.0.1
+extendedKeyUsage = serverAuth

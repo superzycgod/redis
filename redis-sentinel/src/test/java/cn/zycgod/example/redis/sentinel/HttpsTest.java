@@ -23,6 +23,9 @@ import org.junit.jupiter.api.Test;
 
 /**
  * JDK原生SSL/TLS的双向认证请求代码
+ * <p>
+ * 
+ * 私钥和证书均为openssl工具生成的pem格式
  * 
  * @author zhangyanchao
  *
@@ -32,11 +35,13 @@ public class HttpsTest {
 	@Test
 	public void test() throws Exception {
 
-		URL url = new URL("https://192.168.177.128:2376/images/json");
+		URL url = new URL("https://192.168.177.128:2376/info");
 		HttpsURLConnection httpsConn = (HttpsURLConnection) url.openConnection();
 
 		SSLContext sslContext = SSLContexts.custom()
-				// 加载信任的服务端证书，用于客户端验证服务端合法性
+				// 加载信任的服务端证书（server.pem），用于客户端验证服务端合法性
+				// keytool -import -alias "docker01 server cert" -file server.pem -keystore
+				// my.truststore
 				.loadTrustMaterial(new File("F:\\VM\\machines\\machines\\docker01\\my.truststore"),
 						"docker".toCharArray(), new TrustStrategy() {
 							@Override
@@ -45,12 +50,13 @@ public class HttpsTest {
 								return true;
 							}
 						})
-				// 加载需要发送给服务端的证书，用于服务端验证客户端
+				// 加载需要发送给服务端的客户端证书，用于服务端验证客户端合法性
+				// pem -> keystore
 				.loadKeyMaterial(new File("F:\\VM\\machines\\machines\\docker01\\out.keystore"), "docker".toCharArray(),
 						"docker".toCharArray(), new PrivateKeyStrategy() {
 							@Override
 							public String chooseAlias(Map<String, PrivateKeyDetails> aliases, Socket socket) {
-								// d1
+								// 证书别名
 								return "dockerclient";
 							}
 						})
